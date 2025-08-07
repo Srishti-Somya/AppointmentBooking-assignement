@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { format, addDays, startOfDay } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import toast from 'react-hot-toast';
 import { slotsAPI, bookingsAPI } from '../services/api';
 import { Slot, Booking } from '../types';
