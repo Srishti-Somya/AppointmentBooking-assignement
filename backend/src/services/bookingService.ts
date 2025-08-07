@@ -1,7 +1,5 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '../lib/database';
 import { BookingResponse } from '../types';
-
-const prisma = new PrismaClient();
 
 export class BookingService {
   static async createBooking(userId: string, slotId: string): Promise<BookingResponse> {

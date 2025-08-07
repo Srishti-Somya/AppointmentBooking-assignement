@@ -2,7 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
-import { PrismaClient } from '@prisma/client';
+import { prisma, disconnectDatabase } from './lib/database';
+import { config, validateConfig } from './lib/config';
 import { AuthService } from './services/authService';
 import { SlotService } from './services/slotService';
 
@@ -12,14 +13,13 @@ import slotsRoutes from './routes/slots';
 import bookingsRoutes from './routes/bookings';
 
 const app = express();
-const prisma = new PrismaClient();
 
 // Security middleware
 app.use(helmet());
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: config.server.frontendUrl,
   credentials: true
 }));
 
@@ -80,6 +80,9 @@ const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
+    // Validate configuration
+    validateConfig();
+    
     // Test database connection
     await prisma.$connect();
     console.log('✅ Database connected successfully');
@@ -99,10 +102,10 @@ async function startServer() {
     console.log('✅ Slots generated for the next 7 days');
 
     // Start server
-    app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📊 Health check: http://localhost:${PORT}/health`);
-      console.log(`🔗 API Base URL: http://localhost:${PORT}/api`);
+    app.listen(config.server.port, () => {
+      console.log(`🚀 Server running on port ${config.server.port}`);
+      console.log(`📊 Health check: http://localhost:${config.server.port}/health`);
+      console.log(`🔗 API Base URL: http://localhost:${config.server.port}/api`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);
@@ -113,13 +116,13 @@ async function startServer() {
 // Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('🛑 SIGTERM received, shutting down gracefully...');
-  await prisma.$disconnect();
+  await disconnectDatabase();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
   console.log('🛑 SIGINT received, shutting down gracefully...');
-  await prisma.$disconnect();
+  await disconnectDatabase();
   process.exit(0);
 });
 

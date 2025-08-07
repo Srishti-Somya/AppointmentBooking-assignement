@@ -1,8 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma, disconnectDatabase } from './lib/database';
 import { AuthService } from './services/authService';
 import { SlotService } from './services/slotService';
-
-const prisma = new PrismaClient();
 
 async function main() {
   console.log('🌱 Starting database seeding...');
@@ -40,5 +38,5 @@ main()
     process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect();
+    await disconnectDatabase();
   }); 

@@ -1,9 +1,7 @@
-import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-
-const prisma = new PrismaClient();
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+import jwt, { SignOptions } from 'jsonwebtoken';
+import { prisma } from '../lib/database';
+import { config } from '../lib/config';
 
 export class AuthService {
   static async register(name: string, email: string, password: string) {
@@ -17,7 +15,7 @@ export class AuthService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, config.bcrypt.saltRounds);
 
     // Create user
     const user = await prisma.user.create({
@@ -62,7 +60,7 @@ export class AuthService {
         email: user.email,
         role: user.role
       },
-      JWT_SECRET,
+      config.jwt.secret,
       { expiresIn: '24h' }
     );
 
@@ -88,7 +86,7 @@ export class AuthService {
     }
 
     // Hash password
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const hashedPassword = await bcrypt.hash(password, config.bcrypt.saltRounds);
 
     // Create admin user
     const admin = await prisma.user.create({

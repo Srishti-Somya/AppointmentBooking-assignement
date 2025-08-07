@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { AuthService } from '../services/authService';
 import { registerSchema, loginSchema } from '../validation';
+import { handleRouteError, successResponse } from '../lib/errorHandler';
 
 const router = Router();
 
@@ -13,37 +14,9 @@ router.post('/register', async (req: Request, res: Response) => {
       validatedData.password
     );
 
-    res.status(201).json({
-      data: {
-        message: 'User registered successfully',
-        user
-      }
-    });
+    res.status(201).json(successResponse({ user }, 'User registered successfully'));
   } catch (error: any) {
-    if (error.name === 'ZodError') {
-      return res.status(400).json({
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: error.errors[0].message
-        }
-      });
-    }
-
-    if (error.message === 'User with this email already exists') {
-      return res.status(409).json({
-        error: {
-          code: 'USER_EXISTS',
-          message: error.message
-        }
-      });
-    }
-
-    res.status(500).json({
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
-    });
+    handleRouteError(error, res);
   }
 });
 
@@ -55,39 +28,13 @@ router.post('/login', async (req: Request, res: Response) => {
       validatedData.password
     );
 
-    res.status(200).json({
-      data: {
-        message: 'Login successful',
-        token: result.token,
-        role: result.user.role,
-        user: result.user
-      }
-    });
+    res.status(200).json(successResponse({
+      token: result.token,
+      role: result.user.role,
+      user: result.user
+    }, 'Login successful'));
   } catch (error: any) {
-    if (error.name === 'ZodError') {
-      return res.status(400).json({
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: error.errors[0].message
-        }
-      });
-    }
-
-    if (error.message === 'Invalid credentials') {
-      return res.status(401).json({
-        error: {
-          code: 'INVALID_CREDENTIALS',
-          message: error.message
-        }
-      });
-    }
-
-    res.status(500).json({
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
-    });
+    handleRouteError(error, res);
   }
 });
 

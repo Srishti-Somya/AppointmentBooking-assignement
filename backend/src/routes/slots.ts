@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { SlotService } from '../services/slotService';
 import { slotsQuerySchema } from '../validation';
+import { handleRouteError, successResponse } from '../lib/errorHandler';
 
 const router = Router();
 
@@ -12,27 +13,9 @@ router.get('/', async (req: Request, res: Response) => {
       validatedData.to
     );
 
-    res.status(200).json({
-      data: {
-        slots
-      }
-    });
+    res.status(200).json(successResponse({ slots }));
   } catch (error: any) {
-    if (error.name === 'ZodError') {
-      return res.status(400).json({
-        error: {
-          code: 'VALIDATION_ERROR',
-          message: error.errors[0].message
-        }
-      });
-    }
-
-    res.status(500).json({
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Internal server error'
-      }
-    });
+    handleRouteError(error, res);
   }
 });
 
