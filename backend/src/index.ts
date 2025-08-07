@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { prisma, disconnectDatabase } from './lib/database';
 import { config, validateConfig } from './lib/config';
+import { initializeDatabase } from './lib/initDatabase';
 import { AuthService } from './services/authService';
 import { SlotService } from './services/slotService';
 
@@ -83,9 +84,8 @@ async function startServer() {
     // Validate configuration
     validateConfig();
     
-    // Test database connection
-    await prisma.$connect();
-    console.log('✅ Database connected successfully');
+    // Initialize database (connect + create tables if needed)
+    await initializeDatabase();
 
     // Initialize database with admin user and slots
     console.log('🌱 Initializing database...');
