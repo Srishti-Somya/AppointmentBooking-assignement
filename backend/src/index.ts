@@ -19,8 +19,24 @@ const app = express();
 app.use(helmet());
 
 // CORS configuration
+const allowedOrigins = [
+  config.server.frontendUrl,
+  'http://localhost:5173',
+  'https://appointment-booking-assignement-fro.vercel.app'
+].filter(Boolean);
+
 app.use(cors({
-  origin: config.server.frontendUrl,
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) return callback(null, true);
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    const msg = `The CORS policy for this site does not allow access from the specified Origin: ${origin}`;
+    return callback(new Error(msg), false);
+  },
   credentials: true
 }));
 
