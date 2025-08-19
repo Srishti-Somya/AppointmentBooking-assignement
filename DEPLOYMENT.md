@@ -48,6 +48,8 @@ cd backend && npm install && npm run build
 cd backend && npm start
 ```
 
+⚠️ **Important**: The build command now includes `prisma migrate deploy` which will create the necessary database tables. On first deployment, this will create all tables based on the migration files.
+
 **Environment Variables:**
 ```env
 DATABASE_URL=your_postgresql_connection_string
@@ -151,15 +153,21 @@ curl -X POST https://your-backend-url.onrender.com/api/login \
 
 ### Common Issues
 
-1. **CORS Errors**
+1. **Database Migration Errors**
+   - If you see "Table doesn't exist" errors on first deploy
+   - Check that `DATABASE_URL` has proper permissions
+   - Ensure the Prisma migration completed during build
+   - Try manually running: `npx prisma migrate deploy`
+
+2. **CORS Errors**
    - Ensure `FRONTEND_URL` is set correctly in backend
    - Check that the URL matches exactly (including https://)
 
-2. **Database Connection Failed**
+3. **Database Connection Failed**
    - Verify `DATABASE_URL` is correct
    - Check if database is accessible from your deployment region
 
-3. **Build Failures**
+4. **Build Failures**
    - Check Node.js version (18+ required)
    - Verify all dependencies are installed
    - Check build logs for specific errors
